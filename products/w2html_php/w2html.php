@@ -21,7 +21,6 @@
 	while($ret_csv = fgetcsv($csvFp)){
 		mb_convert_variables("UTF-8", "SJIS", $ret_csv);
 		// for ($i=0,$len=count($ret_csv);$i<$len;$i++){
-
 		// };
 
 		// Set initial template.
