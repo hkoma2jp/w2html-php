@@ -6,40 +6,84 @@
 </head>
 <body>
 	<?php
-	// Read Master table.
-	$csvFp = fopen("data/products-data.csv","r");
+	// ## Define.
+	//  -> Filepath define.
+	$configPath = "data/config.json";
+	//  -> Data Table define.
+	$dataTablePath = "data/products-data.csv";
 
-	// Read Template file.
-	$tmpFp = fopen("../template/test.html","r");
+	// ## Ready.
+	//  -> Open Data table.
+	$csvFp = fopen($dataTablePath,"r");
+	//  -> Get Field Names.
+	$fieldArray = fgetcsv($csvFp);
+	mb_convert_variables("UTF-8", "SJIS", $fieldArray);
+	//  -> Get Config Map
+	$configMap = readConfig($configPath);
+	//  -> Set Paramater Map
+	$configMapParamater = $configMap['paramater'];
 
-	while($line = fgets($tmpFp)){
-		$tmp = "";
-		$tmp = $tmp . $line;
-	};
-
-	// Replace & Output.
+	// ## Main. (Read template , Replace & Output.)
 	while($ret_csv = fgetcsv($csvFp)){
-		mb_convert_variables("UTF-8", "SJIS", $ret_csv);
-		// for ($i=0,$len=count($ret_csv);$i<$len;$i++){
-		// };
 
-		// Set initial template.
+		// 1. Read Template file.
+		$defaultTemplate = getTemplate("../template/test.html");
+		$kataban_replace = str_replace('/', '', $ret_csv[0]);
+		$customTemplate = "../template/" . $kataban_replace . ".html";
+
+		//  Template Set.
+		if(file_exists($customTemplate)){
+			$tmp = $customTemplate;
+		}else{
+			$tmp = $defaultTemplate;
+		}
 		$src = $tmp;
+		
+		// 2. Replace.
+		for ($i=0,$len=count($fieldArray);$i<$len;$i++){
+			$paramater = @$configMapParamater[$fieldArray[$i]];
+			$rep_data = $ret_csv[$i];
+			switch ($paramater) {
+				case 'xxxxx':
+					
+					break;
+				default:
+					$src = str_replace($paramater, $rep_data, $src);	
+					break;
+			}
+		}
 
-		// Replace.
-		$src = str_replace("<%= kataban %>", $ret_csv[0], $src);
-
-		$src = str_replace("<%= name %>", $ret_csv[8], $src);
-
-		$src = str_replace("<%= price %>", $ret_csv[9], $src);
-
-		// Output.
+		// 3. Output.
 		print_r($src . "<br />");
 	};
 
 	// Files　Close.
 	fclose($csvFp);
+
+// Function: Read Config file.
+function readConfig($path){
+	$jsonStr = file_get_contents($path);
+	$jsonStr = mb_convert_encoding($jsonStr, 'UTF8', 'ASCII,JIS,UTF-8,EUC-JP,SJIS-WIN');
+	$map = json_decode($jsonStr,true);
+	return $map;
+}
+// Function: Get Template file.
+function getTemplate($path){
+	$tmpFp = fopen($path,"r");
+	while($line = fgets($tmpFp)){
+		$tmp = "";
+		$tmp = $tmp . $line;
+	};
 	fclose($tmpFp);
+	return $tmp;
+}
+// Function: Check Genetate Flag.
+function genCtrl($array){
+	$genFlagFieldName = "生成フラグ";
+	$flagCol = array_search($genFlagFieldName,$array) - 1;
+	return $flag;
+}
+
 	?>
 </body>
 </html>
