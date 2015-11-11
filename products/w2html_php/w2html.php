@@ -7,59 +7,88 @@
 <body>
 	<?php
 	// ## Define.
-	//  -> Filepath define.
-	$configPath = "data/config.json";
-	//  -> Data Table define.
-	$dataTablePath = "data/products-data.csv";
+	// - Config Filepath define.
+	$configPath = 'data/config.json';
+
+	// - Data Table define.
+	$dataTablePath = 'data/products-data.csv';
+	// - Data Table 'generation flag' position.
+	$p_genflag = 0;
+	// - Data Table 'kataban' position.
+	$p_kataban = 1;
+	
+	// - Template Folderpath define.
+	$templateFolderPath = '../template/';
+	// - Output Folder define.
+	$outputFolderPath = '../output/';
+	// - Backup Folder define.
+	$backupFolderPath = '../backup/';
+
 
 	// ## Ready.
-	//  -> Open Data table.
-	$csvFp = fopen($dataTablePath,"r");
-	//  -> Get Field Names.
+	// - Open Data table.
+	$csvFp = fopen($dataTablePath,'r');
+	// - Get Field Names.
 	$fieldArray = fgetcsv($csvFp);
-	mb_convert_variables("UTF-8", "SJIS", $fieldArray);
-	//  -> Get Config Map
+	mb_convert_variables('UTF-8', 'SJIS', $fieldArray);
+	// - Get Config Map
 	$configMap = readConfig($configPath);
-	//  -> Set Paramater Map
+	// - Set Paramater Map
 	$configMapParamater = $configMap['paramater'];
 
-	// ## Main. (Read template , Replace & Output.)
+
+	// ## Main. (Read template,Replace and Output or Delete.)
 	while($ret_csv = fgetcsv($csvFp)){
 
-		// 1. Read Template file.
-		$defaultTemplate = getTemplate("../template/test.html");
-		$kataban_replace = str_replace('/', '', $ret_csv[0]);
-		$customTemplate = "../template/" . $kataban_replace . ".html";
+		// 1. Read Template file
+			// Default Template
+			$defaultTemplateSrc = file_get_contents($templateFolderPath . '!TMP-KATABAN.html');
 
-		//  Template Set.
-		if(file_exists($customTemplate)){
-			$tmp = $customTemplate;
-		}else{
-			$tmp = $defaultTemplate;
-		}
-		$src = $tmp;
-		
-		// 2. Replace.
-		for ($i=0,$len=count($fieldArray);$i<$len;$i++){
-			$paramater = @$configMapParamater[$fieldArray[$i]];
-			$rep_data = $ret_csv[$i];
-			switch ($paramater) {
-				case 'xxxxx':
-					
-					break;
-				default:
-					$src = str_replace($paramater, $rep_data, $src);	
-					break;
+			// Custom Template
+			$kataban_replace = str_replace('/', '', $ret_csv[$p_kataban]);
+			$customTemplate = $templateFolderPath . $kataban_replace . '.html';
+			if(file_exists($customTemplate)){
+				$customTemplateSrc = '';
+				$customTemplateSrc = file_get_contents($customTemplate);
 			}
-		}
 
-		// 3. Output.
-		print_r($src . "<br />");
+			// Select Template and Read.
+			if(file_exists($customTemplate)){
+				$tmp = $customTemplateSrc;
+			}else{
+				$tmp = $defaultTemplateSrc;
+			}
+			$src = $tmp;
+
+		// 2. Target Filepath set
+			$targetFilepath = $outputFolderPath . $kataban_replace . '.html';
+			$targetFilepath_backup = $backupFolderPath . $kataban_replace . '.' . date('Ymd') . '.backup.html';
+
+		// 3. Replace and Output or Delete.
+			switch ($ret_csv[$p_genflag]){
+				case '0': // Generate flag = '0' -> Backup and Delete HTML File.
+					// Backup and Delete.
+					backupAndDelete($targetFilepath, $targetFilepath_backup);
+				break; 
+				case '1': // Generate flag = '1' -> Backup and Genarate HTML File.
+					// Backup.
+					backupAndDelete($targetFilepath, $targetFilepath_backup);
+					// Replace.
+					$src = getReplacedSource($src,$ret_csv,$fieldArray,$configMapParamater);
+					// Output.
+					print_r($src . '<br />');
+					file_put_contents($targetFilepath, $src, LOCK_EX);
+				break;
+				default: // Other -> Skip.
+				break;
+			}
+
 	};
 
 	// Files　Close.
 	fclose($csvFp);
 
+// ## Ready Functions
 // Function: Read Config file.
 function readConfig($path){
 	$jsonStr = file_get_contents($path);
@@ -77,12 +106,39 @@ function getTemplate($path){
 	fclose($tmpFp);
 	return $tmp;
 }
-// Function: Check Genetate Flag.
-function genCtrl($array){
-	$genFlagFieldName = "生成フラグ";
-	$flagCol = array_search($genFlagFieldName,$array) - 1;
-	return $flag;
+
+// ## Oparation Functions
+// Function: Replace paramaters in Template.
+function getReplacedSource($src,$csv_data,$field_names,$config_data){
+	for ($i=0,$len=count($field_names);$i<$len;$i++){
+		$paramater = @$config_data[$field_names[$i]];
+		$buf = $csv_data[$i];
+		mb_convert_variables("UTF-8", "SJIS", $buf);
+		switch ($paramater) {
+			case '<%= price %>':
+				$buf = number_format($buf);
+			break;
+			case 'calFunctionName': // Calicurated.
+				// $buf = calFunction($buf);
+			break;
+			default: // Default.
+			break;
+		}
+		$rep_data = $buf;
+		$src = str_replace($paramater, $rep_data, $src);
+	}
+	return $src;
 }
+// Function: Backup and Delete.
+function backupAndDelete($fromPath,$toPath){
+	if (file_exists($fromPath) && !file_exists($toPath)){
+		rename($fromPath, $toPath);
+	}
+}
+
+// ## Calculate Functions: 
+
+
 
 	?>
 </body>
