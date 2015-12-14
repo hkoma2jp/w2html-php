@@ -2,10 +2,17 @@
 <html lang="ja">
 <head>
 	<meta charset="UTF-8" />
-	<title><%= title %></title>
+	<title><%= name %> - <%= kataban %>(<%= jancd %>)</title>
 </head>
 <body>
-	<%= title %>は<%= name %>が作りました。<br />
-	こんにちは！<%= name %>（<%= kataban %>）　<br />定価は<%= price %>円です。
+
+<p>これはデフォルトテンプレートです。</p>
+
+<ul>
+	<li><%= name %>は私が作りました。</li>
+	<li>こんにちは！<%= name %>（<%= kataban %>）　</li>
+	<li>定価は<%= price %>円です。</li>
+	<li>情報公開日は<%= pub_date %>です。</li>
+</ul>
 </body>
 </html>
