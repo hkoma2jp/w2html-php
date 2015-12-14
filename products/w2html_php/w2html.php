@@ -23,6 +23,9 @@
 	$outputFolderPath = '../output/';
 	// - Backup Folder define.
 	$backupFolderPath = '../backup/';
+	// - Log Counter define.
+	$count_suc = 0;
+	$count_del = 0;
 
 
 	// ## Ready.
@@ -69,6 +72,7 @@
 				case '0': // Generate flag = '0' -> Backup and Delete HTML File.
 					// Backup and Delete.
 					backupAndDelete($targetFilepath, $targetFilepath_backup);
+					$count_del += 1;
 				break; 
 				case '1': // Generate flag = '1' -> Backup and Genarate HTML File.
 					// Backup.
@@ -76,8 +80,9 @@
 					// Replace.
 					$src = getReplacedSource($src,$ret_csv,$fieldArray,$configMapParamater);
 					// Output.
-					print_r($src . '<br />');
+					//print_r($src . '<br />');
 					file_put_contents($targetFilepath, $src, LOCK_EX);
+					$count_suc += 1;
 				break;
 				default: // Other -> Skip.
 				break;
@@ -87,6 +92,9 @@
 
 	// Files　Close.
 	fclose($csvFp);
+
+	// Log Print
+	print_r('生成成功：' . $count_suc . '件<br />削除成功：' . $count_del . '件');
 
 // ## Ready Functions
 // Function: Read Config file.
@@ -131,8 +139,12 @@ function getReplacedSource($src,$csv_data,$field_names,$config_data){
 }
 // Function: Backup and Delete.
 function backupAndDelete($fromPath,$toPath){
-	if (file_exists($fromPath) && !file_exists($toPath)){
-		rename($fromPath, $toPath);
+	if (file_exists($fromPath)){
+		if(!file_exists($toPath)){
+			rename($fromPath, $toPath);	
+		}else{
+			unlink($fromPath);
+		}
 	}
 }
 
