@@ -2,10 +2,14 @@
 <html lang="ja">
 <head>
 	<meta charset="UTF-8" />
-	<title><%= title %></title>
+	<title><%= name %> - <%= kataban %>(<%= jancd %>)</title>
 </head>
 <body>
-	<%= title %>は<%= name %>が作りました。<br />
-	こんにちは！<%= name %>（<%= kataban %>）　<br />定価は<%= price %>円です。
+<ul>
+	<li><%= pub_date %>に情報公開しました。</li>
+	<li><%= kataban %>(<%= jancd %>)です。</li>
+	<li>請多多指教!</li>
+	<li>ちなみに、<%= price %>円です。</li>
+</ul>
 </body>
 </html>
