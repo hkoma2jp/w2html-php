@@ -16,7 +16,7 @@
 	$p_genflag = 0;
 	// - Data Table 'kataban' position.
 	$p_kataban = 1;
-	
+
 	// - Template Folderpath define.
 	$templateFolderPath = '../template/';
 	// - Output Folder define.
@@ -73,7 +73,7 @@
 					// Backup and Delete.
 					backupAndDelete($targetFilepath, $targetFilepath_backup);
 					$count_del += 1;
-				break; 
+				break;
 				case '1': // Generate flag = '1' -> Backup and Genarate HTML File.
 					// Backup.
 					backupAndDelete($targetFilepath, $targetFilepath_backup);
@@ -94,7 +94,7 @@
 	fclose($csvFp);
 
 	// Log Print
-	print_r('生成成功：' . $count_suc . '件<br />削除成功：' . $count_del . '件');
+	print_r('Genarate Success：' . $count_suc . '<br />Delete Success：' . $count_del . '件');
 
 // ## Ready Functions
 // Function: Read Config file.
@@ -141,16 +141,14 @@ function getReplacedSource($src,$csv_data,$field_names,$config_data){
 function backupAndDelete($fromPath,$toPath){
 	if (file_exists($fromPath)){
 		if(!file_exists($toPath)){
-			rename($fromPath, $toPath);	
+			rename($fromPath, $toPath);
 		}else{
 			unlink($fromPath);
 		}
 	}
 }
 
-// ## Calculate Functions: 
-
-
+// ## Calculate Functions:
 
 	?>
 </body>
