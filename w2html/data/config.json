@@ -1,5 +1,5 @@
 {
-	"paramater":{
+	"replace_rules":{
 		"型番":"<%= kataban %>",
 		"ＪＡＮＣＤ":"<%= jancd %>",
 		"商品ステータス":"<%= item_status %>",

@@ -12,40 +12,42 @@
 
 	// - Data Table define.
 	$dataTablePath = 'data/products-data.csv';
-	// - Data Table 'generation flag' position.
+
+	// - Data Table 'generation flag' column.
 	$p_genflag = 0;
-	// - Data Table 'kataban' position.
+	// - Data Table 'kataban' column.
 	$p_kataban = 1;
 
 	// - Template Folderpath define.
-	$templateFolderPath = '../template/';
+	$templateFolderPath = '../products/Template/';
+	$defaultTemplateFilename = 'DEFAULT_TEMPLATE.html';
 	// - Output Folder define.
-	$outputFolderPath = '../output/';
+	$outputFolderPath = '../products/';
 	// - Backup Folder define.
-	$backupFolderPath = '../backup/';
+	$backupFolderPath = '../products/Backup/';
+
 	// - Log Counter define.
 	$count_suc = 0;
 	$count_del = 0;
-
 
 	// ## Ready.
 	// - Open Data table.
 	$csvFp = fopen($dataTablePath,'r');
 	// - Get Field Names.
 	$fieldArray = fgetcsv($csvFp);
-	mb_convert_variables('UTF-8', 'SJIS', $fieldArray);
+	//mb_convert_variables('UTF-8', 'SJIS', $fieldArray);  <- CSV Shift_JIS Formatted.
+
 	// - Get Config Map
 	$configMap = readConfig($configPath);
 	// - Set Paramater Map
-	$configMapParamater = $configMap['paramater'];
-
+	$configMapParamater = $configMap['replace_rules'];
 
 	// ## Main. (Read template,Replace and Output or Delete.)
 	while($ret_csv = fgetcsv($csvFp)){
 
 		// 1. Read Template file
 			// Default Template
-			$defaultTemplateSrc = file_get_contents($templateFolderPath . '!TMP-KATABAN.html');
+			$defaultTemplateSrc = file_get_contents($templateFolderPath . $defaultTemplateFilename);
 
 			// Custom Template
 			$kataban_replace = str_replace('/', '', $ret_csv[$p_kataban]);
@@ -94,7 +96,7 @@
 	fclose($csvFp);
 
 	// Log Print
-	print_r('Genarate Success：' . $count_suc . '<br />Delete Success：' . $count_del . '件');
+	print_r('Genarate Success：' . $count_suc . '<br />Delete Success：' . $count_del);
 
 // ## Ready Functions
 // Function: Read Config file.
@@ -121,7 +123,7 @@ function getReplacedSource($src,$csv_data,$field_names,$config_data){
 	for ($i=0,$len=count($field_names);$i<$len;$i++){
 		$paramater = @$config_data[$field_names[$i]];
 		$buf = $csv_data[$i];
-		mb_convert_variables("UTF-8", "SJIS", $buf);
+		//mb_convert_variables("UTF-8", "SJIS", $buf); <- CSV Shift_JIS Formatted.
 		switch ($paramater) {
 			case '<%= price %>':
 				$buf = number_format($buf);
